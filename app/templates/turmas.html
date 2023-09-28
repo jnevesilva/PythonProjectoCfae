@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Gestão da formação{% endblock title %}
+{% block main-content %}
+
+    <style>
+        h1 {text-align: center}
+        th,tr {font-size: 0.875em;text-align: left;}
+        th {background-color: #4CAF50;color: white;}
+        th, td {padding: 5px }
+        table{margin: 0 auto}
+         .linhas:hover {background-color: #f5f5f5}
+         a:link {
+            text-decoration: none;
+          }
+    </style>
+
+
+    {% if turmas_list %}
+        
+        <table>
+        <h1>Oferta formativa</h1>
+        <tbody> 
+        {% for item in turmas_list %}
+         
+        <tr>
+        <td colspan="2"><h5 style="background-color:#CCC">{{ item.codigoacao }}</h5>
+        </tr>
+        <tr class="linhas">
+        <td>      
+            <i class="fa fa-users" aria-hidden="true"></i>
+            Turma: {{ item.turma }} 
+            &nbsp; &nbsp;<i class="fa fa-calendar" aria-hidden="true"></i>
+            {{ item.datainicio }} a {{ item.datafim }}<br>
+            
+            <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+            Modalidade: {{ item.codigoacao.get_modalidade_display}} 
+            &nbsp; &nbsp;<i class="fa fa-clock-o" aria-hidden="true"></i>
+            Duração: {{ item.codigoacao.horas }}h 
+            &nbsp; &nbsp;<i class="fa fa-map-marker" aria-hidden="true"></i>
+            {{ item.get_regime_display }}<br>
+            
+            <i class="fa fa-user" aria-hidden="true"></i>  
+            &nbsp;Formador(es):
+            {% for registo in item.inscritos_set.all %}
+                {% if registo.formador %}
+                    {{ registo.idutilizador.docente.nome }}&nbsp;|      
+                {% endif %}   
+            {% endfor %}
+            <br>
+
+            <i class="fa fa-users" aria-hidden="true"></i>   
+            Publico alvo: {{ item.publicoalvo }}
+
+            <!--Sessões de formação-->
+            <br>
+            <div style="font-size: 0.875em">
+                <hr>
+            {% for sessao in item.sessoes_set.all|dictsort:"data" %}
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+                    <strong>  Sessão {{ sessao.sessao }} </strong> - {{ sessao.data }} às {{ sessao.hora }}h
+                    ({{ sessao.duracao }} h) <br>
+            {% endfor %}
+            </div>
+        </td>
+                
+                <!--Estado da ação de formação-->
+
+                {% now "Y-m-d" as todays_date %}
+                
+                {% if todays_date < item.datainicioinsc|date:"Y-m-d" %}
+                    <td><a class="btn btn-warning btn-sm" href=""><i class="fa fa-spinner" aria-hidden="true"></i> Em preparação</a></td>
+                {% else %}  
+                    {% if todays_date <= item.datalimiteinsc|date:"Y-m-d" %}
+                        {% if user.is_authenticated %}
+                            {% if user.docente.username %}
+                                <td><a class="btn btn-success btn-sm" href="inscricao_detalhe/{{item.id}}">Inscrever-me</a>
+                                <br> Data limite:<br>  {{item.datalimiteinsc}}</td>
+                            {% else %} 
+                                <td><a class="btn btn-success btn-sm" href="/profile">Inscrever-me</a></td>
+                            {% endif %}
+                        {% else %}
+                                <td><a class="btn btn-success btn-sm" href="/accounts/login">Inscrever-me</a></td>  
+                        {% endif %}
+                    {% else %}
+                        {% if todays_date < item.datainicio|date:"Y-m-d" %}
+                            <td><a class="btn btn-info btn-sm " href="#"><i class="fa fa-lock" aria-hidden="true"></i> Inscrições fechadas</a></td>
+                        {% else %}
+                            {% if todays_date <= item.datafim|date:"Y-m-d" %}
+                                <td><a class="btn btn-primary btn-sm " href="#"><i class="fa fa-unlock" aria-hidden="true"></i> A decorrer</a></td>
+                            {% else %}
+                                {% if item.fechada  %}
+                                    <td><a class="btn btn-secondary btn-sm" href="#"><i class="fa fa-lock" aria-hidden="true"> Fechada</a></td>
+                                {% else %}
+                                    <td><a class="btn btn-secondary btn-sm" href="#">Aguarda relatório</a></td>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}    
+            </tr> 
+                  
+            
+
+
+            <!--Formandos inscritos-->
+             <tr> 
+                <td colspan="2" 
+                    class="d-inline-flex gap-1">
+                    <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#{{item}}" aria-expanded="false" aria-controls="{{item}}">
+                        Inscritos ({{item.inscritos_set.all.count}})
+                    </button>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+
+            <div class="collapse" id="{{item}}">
+                <p  style="background-color:#f2f2f2">
+                    {% for registo in item.inscritos_set.all|dictsort:"idutilizador.docente.nome" %}
+                            <i class="fa fa-user" aria-hidden="true"></i>
+                            <strong>{{ registo.idutilizador.docente.nome }} </strong>
+                            ({{ registo.idutilizador.docente.grupo}}) 
+                            &nbsp;
+                            {{ registo.idutilizador.email}}
+                            &nbsp;
+                            {% if registo.formador  %}
+                            (Formador)
+                            {% else %}
+                            {% if item.fechada %}
+                                {% if registo.concluiu %}
+                                <strong> (Classificação: {{registo.classificacao}})</strong>
+                                {% else %}
+                                    (Não concluiu)
+                                {% endif %}
+                            {% endif %}
+                            {% endif %} 
+                            <br>
+                            {{ registo.idutilizador.docente.get_agrupamento_display}}
+                            <br>
+                      
+                    {% endfor %}
+                    </p>  
+                    <a href="turma_inscritos/{{item.id}}">[Gerir inscrições]</a>  &nbsp; &nbsp;  
+                    <a href="turma_inscritos_pdf/{{item.id}}">[Imprimir Pdf]</a>        
+                </td>  
+            </tr>
+            </div>
+            </div>  
+   
+        {% endfor %}
+        
+        {% else %}
+            <h1>Não existem turmas</h1>
+        {% endif %}
+        </tbody>
+    </table>
+
+{% endblock main-content %}

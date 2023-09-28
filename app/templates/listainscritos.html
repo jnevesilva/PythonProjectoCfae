@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+
+    <style>
+        h1 {text-align: center}
+        th,tr {font-size: 0.875em;text-align: left;}
+        th {background-color: #4CAF50;color: white;}
+        th, td {padding: 5px }
+        table{margin: 0 auto}
+         .linhas:hover {background-color: #f5f5f5}
+    </style>
+    
+    <table>
+        {% if user.is_superuser %}
+
+        {% if inscritos_list %}
+            <h1>Inscrições</h1>
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>turma</th>
+                <th>formandos</th>
+                <th>data inscrição</th>
+            </tr>
+            </thead>
+            
+            <tbody>
+        {% for inscritos in inscritos_list %}
+            <tr class="linhas">
+                <td>{{ inscritos.id }}</td>
+                <td>{{ inscritos.idturma }} {{ inscritos.idturma.codigoacao }} </td>
+                <td>{{ inscritos.idutilizador }}. {{ inscritos.idutilizador.docente.nome }} . {{inscritos.idutilizador.docente.grupo}}</td>
+                <td>{{ inscritos.datahorainscricao }}</td>
+   
+        {% endfor %}
+        {% else %}
+            <h1>Não existem Açoes</h1>
+        {% endif %}
+
+        {% endif %}
+            
+        </tbody>
+    </table>
+    
+{% endblock main-content %}

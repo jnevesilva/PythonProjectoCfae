@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+
+    <style>
+        h1 {text-align: center}
+        th,tr {font-size: 0.875em;text-align: left;}
+        th {background-color: #4CAF50;color: white;}
+        th, td {padding: 5px }
+        table{margin: 0 auto}
+         .linhas:hover {background-color: #f5f5f5}
+    </style>
+    
+    <table>
+        
+        {% if acao_list %}
+            <h1>Ações</h1>
+            <thead>
+            <tr>
+                <th>imagem</th>
+                <th>ID</th>
+                <th>Designação</th>
+                <th>Duração</th>
+                <th>Modalidade</th>
+                <th>Descritivo</th>
+
+            </tr>
+            </thead>
+            
+            <tbody>
+        {% for item in acao_list %}
+            <tr class="linhas">
+                <td> <img src="/app/media/{{item.acao_images}}" width='70px'></td>
+                <td>{{ item.id }}</td>
+                <td>{{ item.designacao }}</td>
+                <td>{{ item.horas }}</a></td>
+                <td>{{ item.modalidade }}</td>
+                <td><a href="{{ item.acao_doc }}" target="_blank">Descritvo</a></td>
+            </tr>
+                   
+                    {% for trm in acao_list.turma_set.all %}
+                    <tr class="linhas">
+                        <td>
+                        <strong> {{ trm.id }} </strong> - Turma  {{ trm.turma }} às {{ trm.inicio }}h
+                        (duração:  {{ trm.duracao }} h) ||
+                        </td>
+                    </tr>
+                    {% endfor %}
+                
+        {% endfor %}
+        {% else %}
+            <h1>Não existem Açoes</h1>
+        {% endif %}
+        </tbody>
+    </table>
+    
+{% endblock main-content %}

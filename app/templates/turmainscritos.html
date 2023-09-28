@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Inscritos na turma{% endblock title %}
+{% block main-content %}
+    
+    <style>
+        h1 {text-align: center}
+        th,tr {font-size: 0.875em;text-align: left;}
+        th {background-color: #4CAF50;color: white;}
+        th, td {padding: 5px }
+        table{margin: 0 auto}
+         .linhas:hover {background-color: #f5f5f5}
+         a:link {
+            text-decoration: none;
+          }
+    </style>
+    
+    <form action="{% url 'gestao_inscricoes'  %}" method='POST' enctype='multypart/form-data'>
+        {% csrf_token %}
+    <table> 
+        
+            <input id="id_turmat" type="text" name="turma_atual" value={{turma}} maxlength="100" readonly hidden>
+            <h1>Turma {{turma}} - Formandos inscritos</h1>
+            <thead>
+            <tr>
+                <th>Selecionar</th>
+                <!--<th>Datahora inscrição</th>-->
+                <th>Confirmado</th>
+                <th>Username</th>
+                <th>Nome</th>
+                <th>Grupo</th>
+                <th>Agrupamento</th> 
+                <th>email</th>   
+                <th>contacto</th>       
+            </tr>
+            </thead>
+            <tbody> 
+            <tr>
+               
+                {% for registo in inscritos %}
+                    
+                    <tr class="linhas">
+                        <td><input name="checks[]" type="checkbox" value="{{registo.id }}" /></td>
+                        <!--<td> {{ registo.datahorainscricao}} </td> -->
+                        {% if registo.confirmado %} 
+                        <td> 
+                            <i class="fa fa-check fa-lg" aria-hidden="true" style="color:green"></i>
+                        </td> 
+                        {% else %} 
+                        <td> 
+                            <i class="fa fa-times fa-lg" aria-hidden="true" style="color:red"></i>
+                        </td> 
+                        {% endif %}  
+
+                        <td> {{ registo.idutilizador}}  </td>
+                        {% if registo.formador %}
+                        <td> <strong>{{ registo.idutilizador.docente.nome}} (formador)</strong> </td>
+                        {% else %}
+                        <td> {{ registo.idutilizador.docente.nome}} </td>
+                        {% endif %}
+                        <td> {{ registo.idutilizador.docente.grupo}} </td> 
+                        <td> {{ registo.idutilizador.docente.get_agrupamento_display}} </td>  
+                        <td> {{ registo.idutilizador.email}} </td> 
+                        <td> {{ registo.idutilizador.docente.telemovel}} </td>              
+                    </tr>
+                {% endfor %}
+                
+                <tr>
+                    <td colspan='8'>
+                        <hr>
+                            <input type="submit" name="confirmar" value="Confirmar inscrições selecionadas" class="btn btn-sm btn-secondary"> 
+                    </td> 
+                </tr>
+              
+                <tr>
+                    <td colspan='8'>
+                        <hr>
+                        
+                            <select name="turma" id="turma" class="form-select form-select-sm">
+                                {% for registo in listaturmas%}
+                                    <option value={{registo.turma}}>{{registo.turma}} - {{registo.codigoacao}}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <input type="submit"  name="mover" value="Mover os selecionados para a turma:" class="btn btn-sm btn-primary"> 
+                    </td> 
+                </tr>
+
+                    <td colspan='8'>
+                        <hr>
+                            <select name="docente" id="docente" class="form-select form-select-sm">
+                                {% for docente in listadocentes%}
+                                    <option value={{docente.id}}>{{docente.nome}} - {{docente.grupo}}- {{docente.agrupamento}}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <input type="submit" name="inscrever" value="Inscrever o formando selecionado" class="btn btn-sm btn-primary"> 
+                    </td> 
+                </tr>
+                <tr>
+                    <td colspan='8'>
+                        <hr>
+                            <select name="formador" id="formador" class="form-select form-select-sm">
+                                {% for formador in listaformadores%}
+                                    <option value={{formador.id}}>{{formador.nome}} - {{formador.grupo}}- {{formador.agrupamento}}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <input type="submit" name="associar" value="Associar formador selecionado" class="btn btn-sm btn-primary"> 
+                    </td> 
+                </tr>
+
+                <tr>
+                    <td colspan='8'>
+                        <hr>
+                            <input type="submit" name="eliminar" value="eliminar selecionados" class="btn btn-sm btn-danger"> 
+                    </td> 
+                </tr>
+            
+            </tbody>
+        </table>
+        
+    </form>
+           
+    
+{% endblock main-content %}

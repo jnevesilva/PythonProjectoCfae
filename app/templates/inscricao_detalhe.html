@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+    <style>
+        h1,h3, p {text-align: center}
+        th,tr {font-size: 0.875em;text-align: left;}
+        th {background-color: #4CAF50;color: white;}
+        th, td {padding: 5px }
+        table{margin: 0 auto}
+         .linhas:hover {background-color: #f5f5f5}
+    </style>
+
+   
+    <table>
+    <tr><td>
+        <h6>Pretendo inscrever-me na ação de formação:</h6>
+        <h4> <strong>{{idetalhe.codigoacao}}</strong></h4>
+        <h5> turma: {{idetalhe.turma}}, user: {{request.user}}</h5>
+        <h5> a decorrer entre <strong>{{idetalhe.datainicio}}</strong> e
+            <strong>{{idetalhe.datafim}}</strong></h5><br>
+
+        <p><a href="confirma/{{idetalhe.id}}">Confirmar a Inscrição</a> </p>
+        <p>{{idetalhe.existe}}</p>
+    </td></tr>
+    </table>    
+    {% endblock main-content %}

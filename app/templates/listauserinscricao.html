@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+    
+    <style>
+        h1 {text-align: center}
+        th,tr {font-size: 0.875em;text-align: left;}
+        th {background-color: #4CAF50;color: white;}
+        th, td {padding: 5px }
+        table{margin: 0 auto}
+         .linhas:hover {background-color: #f5f5f5}
+        a:link {
+            text-decoration: none;}
+    </style>
+    <table> 
+        {% if insc %}
+        <h1>As minhas ações de formação</h1>
+ 
+            <tbody> 
+
+                {% for inscricao in insc %}
+                <tr class="linhas">
+                <td colspan="4">
+                    <h5 style="background-color: #CCC">{{ inscricao.idturma.codigoacao}} </h5>
+                        {% if inscricao.formador %}
+                          <span style="color: green"><strong> É formador desta ação </strong><span>
+                        {% endif %}
+                </td>
+                </tr>
+
+                <tr>
+                <td>
+                    Turma:
+                    <h6> {{ inscricao.idturma }} </h6>
+                </td>
+                <td>
+                    Início da ação:
+                    <h6>{{ inscricao.idturma.datainicio}}</h6>
+                </td>
+                <td>
+                    Final da ação:
+                    <h6>{{ inscricao.idturma.datafim}}</h6>
+                </td>
+               
+                <td>
+                        {% now "Y-m-d" as todays_date %}
+                        {% if todays_date <= inscricao.idturma.datalimiteinsc|date:"Y-m-d" %}
+                            {% if user.is_authenticated %}
+                                <a class="btn btn-danger"  href="{% url 'deleteuserinscricao' inscricao.id %}" >Anular inscrição</a><br>
+                                efetuada em {{ inscricao.datahorainscricao }}. <br>
+                                Pode anular até {{ inscricao.idturma.datalimiteinsc }}
+                            {% endif %}
+                        {% else %}
+                            {% if todays_date < inscricao.idturma.datainicio|date:"Y-m-d" %}
+                                {% if inscricao.confirmado %}
+                                    <a class="btn btn-primary"  href="#" >inscrição Confirmada</a><br>
+                                {% endif %}
+                            {% else %}
+                                {% if todays_date <= inscricao.idturma.datafim|date:"Y-m-d" %}
+                                    <a class="btn btn-secondary"  href="#" >a frequentar</a><br>
+                                {% else %}
+                                    {% if inscricao.idturma.fechada %}  
+                                        <a class="btn btn-primary" href="#">Terminada</a>
+                                            
+                                            {% if inscricao.concluiu %} 
+                                            </td>
+                                            <tr  style="color:white; background-color: #5499C7">
+                                                <td>Concluiu: <br><h6>Sim</h6></td>
+                                                <td>Classificação:  <br><h6>{{inscricao.classificacao}}</h6></td>
+                                                <td>Certificado: <br><h6>xxxxxxx </h6></td>
+                                                <td>Avaliação da ação:<br> <h6>xxxxx </h6></td>
+                                             
+                                            </tr>
+                                            {% else %}  
+                                            </td>
+                                            <tr  style="color:white; background-color: #5499C7">
+                                                <td>Concluiu: <br><h6>Não</h6></td>
+                                                <td>Classificação:  <br><h6>---</h6></td>
+                                                <td>Certificado: <br><h6>----</h6></td>
+                                                <td>Avaliação da ação:<br> <h6>----</h6></td>
+                                            </tr>
+                                            {% endif %} 
+                                    {% else %}  
+                                            <a class="btn btn-primary" href="#">Aguarda relatório </a> 
+                                    {% endif %} 
+                                {% endif %}
+                            {% endif %} 
+                        {% endif %} 
+                </td>
+            </tr>               
+              
+                    {% if inscricao.confirmado %}
+
+                    <tr>
+                        <td colspan="4">
+
+                            <div class="accordion accordion-flush" id="accordionFlushExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="flush-headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{inscricao.id}}"  aria-expanded="false" aria-controls="flush-collapseOne">
+                                      Sessões
+                                    </button>
+                                    </h2>
+
+                                    <div id="{{inscricao.id}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                        <div class="accordion-body" style="background-color:#f2f2f2" >
+                                            {% for sessao in inscricao.idturma.sessoes_set.all|dictsort:"data" %}
+                                            <p>
+                                                Sessão {{ sessao.sessao }} 
+                                                       
+                                                - {{ sessao.data }} às {{ sessao.hora }}h
+                                                ( {{ sessao.duracao }} h) <br>
+                                            
+                                                <strong>Sumário:</strong> {{ sessao.sumario }}<br>
+                                                
+                                                {% if inscricao.formador %}   
+                                                <span style="color:red">Faltas ({{sessao.faltas.all.count}}):<br></span>
+                                                {% for docente in sessao.faltas.all %}
+                                                    {{docente}}<br>
+                                                {% endfor %}
+                                                <a href="{% url 'atualizar_sessao' sessao.id %}">[Alterar] </a>
+
+                                                <a href="{% url 'apagar_registo' sessao.id %}" 
+                                                    onclick="return confirm('Tem a certeza que que eliminar esta sessão?')">[Eliminar] </a>
+
+                                                {% endif %}
+                                            </p>  
+                                           
+                                            {% endfor %}
+                                            {% if inscricao.formador %}
+                                            <a   href="{% url 'criar_sessao' inscricao.idturma.id %}">Adicionar sessão </a> 
+                                            {% endif %}
+                                        </div>
+                                    
+                                          
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingTwo">
+                                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f{{inscricao.id}}" aria-expanded="false" aria-controls="collapseTwo">
+                                        Lista de formandos
+                                      </button>
+                                    </h2>
+                                    
+                                    <div id="f{{inscricao.id}}" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                      <div class="accordion-body" style="background-color:#f2f2f2">
+                                       
+                                            {% for registo in tot_insc|dictsort:"idutilizador.docente.nome"  %}
+                                            {% if registo.idturma == inscricao.idturma %}
+                                                <i class="fa fa-user" aria-hidden="true"></i>
+                                                <strong>{{registo.idutilizador.docente.nome}}</strong>
+                                                ({{ registo.idutilizador.docente.grupo}}) 
+                                                &nbsp;
+                                                {{ registo.idutilizador.email}}
+                                                <br>
+                                                {{ registo.idutilizador.docente.get_agrupamento_display}}
+                                                &nbsp;
+                                                {% if registo.formador  %}
+                                                    (Formador)
+                                                {% else %}
+                                                    {% if item.fechada %}
+                                                        {% if registo.concluiu %}
+                                                        <strong> (Classificação: {{registo.classificacao}})</strong>
+                                                        {% else %}
+                                                            (Não concluiu)
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endif %}
+                                                <br>
+                                            {% endif %}
+                                            
+                                            {% endfor %}
+                                    
+                                   
+                                      </div>
+                                    </div>
+                                  </div>
+
+                            </div>
+                        </td>
+                    <tr>
+                      
+                    {% endif %}
+             
+            
+        {% endfor %}
+        {% else %}
+            <h1>Não existem inscrições</h1>
+        {% endif %}
+        </tbody>
+    </table>
+    
+{% endblock main-content %}

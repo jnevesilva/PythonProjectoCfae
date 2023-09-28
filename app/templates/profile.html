@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Perfil{% endblock title %}
+{% block main-content %}
+
+<div class="container bg-light shadow-md p-5 form-layout-prof">
+    <div class "row">
+            <h5>Bem vindo <strong>{{request.user}} </strong></h5>
+            <i>Mantenha sempre os seus dados atualizados</i>
+            <form action="" method="post" novalidate class="shadow p-5">
+                {% csrf_token %}
+
+                <!--
+                {% for fm in form %}
+                {{ fm.label_tag }} {{ fm }}  <small class="text-danger">{{ fm.errors | striptags }} </small>
+                <br>
+                {% endfor %}-->
+                
+                {% if messages %}
+                {% for msg in messages %}
+                    <div class="alert alert-{{msg.tags}}" role="alert"> {{msg}}</div>
+                {% endfor%}
+                {% endif%}
+                
+                
+                {{form.as_p}} 
+
+                
+                <input type="submit" value="Submeter" class="btn btn-primary"> <br>
+
+                {% if form.non_fiels_errors %}
+                    {% for error in form.non_fiels_errors %}
+                        <p class="alert alert-danger my-3"> {{error}}</p>
+                    {% endfor%}
+                {% endif%}
+
+                
+
+            </form>
+        
+    </div>
+</div>
+
+{% endblock main-content %}

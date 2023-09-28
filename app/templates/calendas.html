@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+    <h1>Calendário das sessões de formação</h1>
+
+    <style>
+        h1 {text-align: center}
+        th,tr {font-size: 0.875em;text-align: left;}
+        th {background-color: #4CAF50;color: white;}
+        th, td {padding: 5px }
+        table{margin: 0 auto}
+         .linhas:hover {background-color: #f5f5f5}
+         a {color:white}
+    </style>
+    
+    <table>
+        
+        {% if calendas %}
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>Dia 
+                    <a href="{% url 'calendas' 1 %}">
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                    </a>
+                    <a href="{% url 'calendas' 2 %}">
+                    <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                    </a>
+                </th>
+                <th>Hora</th>
+                <th>Duração</th>
+                <th>Turma</th>
+                <th>Ação
+                    <a href="{% url 'calendas' 3 %}">
+                        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                    </a>
+                    <a href="{% url 'calendas' 4 %}">
+                        <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                    </a>
+                </th>
+                
+                <th>Local</th>
+                <th>Sessão</th>
+
+            </tr>
+            </thead>
+            
+            <tbody>
+        {% now "Y-m-d" as todays_date %}
+        {% for item in calendas %}
+            {% if todays_date > item.data|date:"Y-m-d" %}
+                <tr class="linhas" style="color:red">
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.data|date:"D, d M Y"}}</td>
+                    <td>{{ item.hora }}</td>
+                    <td>{{ item.duracao }}</td>
+                    <td>{{ item.codturma}}</td>
+                    <td>{{ item.codturma.codigoacao}}</td>
+                    <td>{{ item.localformacao }}</td>
+                    <td>Sessão {{ item.sessao}}</td>
+                </tr>
+            {% else %} 
+                {% if todays_date  == item.data|date:"Y-m-d" %}
+                    <tr class="linhas" style="color:green">
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.data|date:"D, d M Y"}}</td>
+                        <td>{{ item.hora }}</a></td>
+                        <td>{{ item.duracao }}</td>
+                        <td>{{ item.codturma}}</td>
+                        <td>{{ item.codturma.codigoacao}}</td>
+                        <td>{{ item.localformacao }}</td>
+                        <td>Sessão {{ item.sessao}}  </td>   
+                    </tr>
+                {% else %}
+                <tr class="linhas" style="color:blue">
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.data|date:"D, d M Y"}}</td>
+                    <td>{{ item.hora }}</a></td>
+                    <td>{{ item.duracao }}</td>
+                    <td>{{ item.codturma}}</td>
+                    <td>{{ item.codturma.codigoacao}}</td>
+                    <td>{{ item.localformacao }}</td>
+                    <td>Sessão {{ item.sessao}}  </td>   
+                </tr>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% else %}
+            <h1>Não existem registos</h1>
+        {% endif %}
+        </tbody>
+    </table>
+    
+{% endblock main-content %}

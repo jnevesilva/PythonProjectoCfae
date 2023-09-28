@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Gestão da formação{% endblock title %}
+{% block main-content %}
+
+    <style>
+        h1 {text-align: center}
+        th,tr {font-size: 0.875em;text-align: left;}
+        th {background-color: #4CAF50;color: white;}
+        th, td {padding: 5px }
+        table{margin: 0 auto}
+         .linhas:hover {background-color: #f5f5f5}
+         a:link {
+            text-decoration: none;
+          }
+    </style>
+
+
+    {% if turmas_list %}
+        <h1>Oferta formativa</h1>
+        <table>
+        <tbody> 
+        {% for item in turmas_list %}
+
+            {% now "Y-m-d" as todays_date %}
+            {% if todays_date <= item.datalimiteinsc|date:"Y-m-d" %}
+                {% if todays_date >= item.datainicioinsc|date:"Y-m-d" %}
+
+                    <tr class="linhas">
+                        <td> <img src="/static/app/{{item.codigoacao.acao_images}}" width='100px'></td>
+
+                        <td><h5>{{ item.codigoacao }}</h5>
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                        Turma: {{ item.turma }} 
+                        &nbsp; &nbsp;<i class="fa fa-calendar" aria-hidden="true"></i>
+                        {{ item.datainicio }} a {{ item.datafim }}<br>
+                        <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                        Modalidade: {{ item.codigoacao.get_modalidade_display}} 
+                        &nbsp; &nbsp;<i class="fa fa-clock-o" aria-hidden="true"></i>
+                        Duração: {{ item.codigoacao.horas }}h 
+                        &nbsp; &nbsp;<i class="fa fa-map-marker" aria-hidden="true"></i>
+                        {{ item.get_regime_display }}
+                        <br>
+                        <i class="fa fa-user" aria-hidden="true"></i>  
+                        &nbsp;Formador(es):
+                        {% for registo in item.inscritos_set.all %}
+                            {% if registo.formador %}
+                                {{ registo.idutilizador.docente.nome }}&nbsp;|      
+                            {% endif %}  
+                        
+                        {% endfor %}
+                        <br>
+
+                        <i class="fa fa-users" aria-hidden="true"></i>   
+                        Publico alvo: {{ item.publicoalvo }}
+
+                        <hr>
+
+                        {% for sessao in item.sessoes_set.all %}
+                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                                <strong>  Sessão {{ sessao.sessao }} </strong> - {{ sessao.data }} às {{ sessao.hora }}h
+                                (duração:  {{ sessao.duracao }} h) <br>
+                        {% endfor %}
+                    
+                        </td>          
+
+                        {% if user.is_authenticated %}
+                            {% if user.docente.username %}
+                                <td><a class="btn btn-success btn-sm" href="inscricao_detalhe/{{item.id}}">Inscrever-me</a>
+                                <br> Data limite:<br>  {{item.datalimiteinsc}}</td>
+                            {% else %} 
+                                <td><a class="btn btn-success btn-sm" href="/profile">Inscrever-me</a></td>
+                            {% endif %}
+                        {% else %}
+                                <td><a class="btn btn-success btn-sm" href="/accounts/login">Inscrever-me</a></td>  
+                        {% endif %}
+                
+                    </tr> 
+                            
+                    <tr> 
+                        <td>&nbsp;</td>
+                        <td colspan="3" 
+                            class="d-inline-flex gap-1">
+                            <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#{{item}}" aria-expanded="false" aria-controls="{{item}}">
+                                Ver inscritos ({{item.inscritos_set.all.count}})
+                            </button>
+                        </td>
+                    </tr>
+                    {% endif %}  
+
+            <tr>
+                <td>&nbsp;</td>
+                <td colspan="3">
+
+            <div class="collapse" id="{{item}}">
+                <p class="card card-body">
+                    {% for registo in item.inscritos_set.all %}
+                        
+                            <span class="fa fa-user" aria-hidden="true">
+                            {{ registo.idutilizador.docente.nome}}  
+                            ({{ registo.idutilizador.docente.grupo}}) 
+                            &nbsp;
+                            {{ registo.idutilizador.email}}
+                            &nbsp;
+                            {{ registo.idutilizador.docente.get_agrupamento_display}}
+                            &nbsp;
+                            {% if registo.formador  %}
+                                (FORMADOR)
+                            {% else %}
+                                {% if item.fechada %}
+                                    {% if registo.concluiu %}
+                                    <strong> (Classificação: {{registo.classificacao}})</strong>
+                                    {% else %}
+                                        (Não concluiu)
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                            <br>
+                    {% endfor %}
+                    
+                    <a href="turma_inscritos/{{item.id}}">Ver detalhe</a>          
+                </td>  
+            </tr>
+            </div>
+            </div>  
+        {% endif %}  
+        {% endfor %}
+        
+        
+    {% else %}
+        <h1>Não existem turmas</h1>
+    {% endif %}
+        </tbody>
+    </table>
+
+{% endblock main-content %}
